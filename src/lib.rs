@@ -22,8 +22,13 @@ mod math;
 #[cfg(feature = "loom")]
 pub(crate) use loom::sync::atomic::AtomicU64;
 
-#[cfg(not(feature = "loom"))]
+#[cfg(all(not(feature = "loom"), target_has_atomic = "64"))]
 pub(crate) use core::sync::atomic::AtomicU64;
+
+#[cfg(all(not(feature = "loom"), not(target_has_atomic = "64")))]
+mod atomic_compat;
+#[cfg(all(not(feature = "loom"), not(target_has_atomic = "64")))]
+pub(crate) use atomic_compat::AtomicU64;
 
 #[cfg(all(feature = "loom", feature = "serde"))]
 compile_error!("features `loom` and `serde` are mutually exclusive");
